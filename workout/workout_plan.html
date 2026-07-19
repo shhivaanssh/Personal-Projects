@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5-Day Aesthetic Physique Plan</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0a0a0a;
+    color: #f0f0f0;
+    min-height: 100vh;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0a0a0a 0%, #111 50%, #0a0a0a 100%);
+    border-bottom: 1px solid #1e1e1e;
+    padding: 2.5rem 1.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%; transform: translateX(-50%);
+    width: 400px; height: 300px;
+    background: radial-gradient(ellipse, rgba(255,100,0,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #ff6a00;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+  .hero-title {
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .hero-title span { color: #ff6a00; }
+  .hero-sub {
+    margin-top: 0.6rem;
+    font-size: 13px;
+    color: #666;
+    letter-spacing: 0.03em;
+  }
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-val {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .stat-lbl {
+    font-size: 10px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+  .stat-sep { width: 1px; background: #1e1e1e; }
+
+  /* PHYSIQUE TARGET CARD */
+  .target-section {
+    padding: 1.5rem;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #ff6a00;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  .target-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .target-chip {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .chip-icon { font-size: 18px; margin-bottom: 4px; }
+  .chip-name { font-size: 11px; color: #aaa; font-weight: 500; }
+  .chip-goal { font-size: 10px; color: #555; margin-top: 2px; }
+
+  /* WEEK OVERVIEW */
+  .week-overview {
+    padding: 1.5rem;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 0.75rem;
+  }
+  .week-day {
+    border-radius: 8px;
+    padding: 8px 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .week-day.push { background: rgba(255,106,0,0.12); border-color: rgba(255,106,0,0.25); }
+  .week-day.pull { background: rgba(100,180,255,0.08); border-color: rgba(100,180,255,0.2); }
+  .week-day.legs { background: rgba(100,220,120,0.08); border-color: rgba(100,220,120,0.2); }
+  .week-day.upper { background: rgba(200,150,255,0.08); border-color: rgba(200,150,255,0.2); }
+  .week-day.rest { background: #111; border-color: #1e1e1e; }
+  .week-day:hover:not(.rest) { transform: translateY(-2px); }
+  .wday-name { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: #555; }
+  .wday-type { font-size: 10px; font-weight: 700; margin-top: 4px; color: #fff; }
+  .wday-type.push { color: #ff6a00; }
+  .wday-type.pull { color: #64b4ff; }
+  .wday-type.legs { color: #64dc78; }
+  .wday-type.upper { color: #c896ff; }
+  .wday-type.rest { color: #333; }
+  .wday-muscle { font-size: 9px; color: #444; margin-top: 3px; line-height: 1.3; }
+
+  /* DAY TABS */
+  .tabs-section { padding: 1.5rem 1.5rem 0; }
+  .tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #222;
+    background: #111;
+    color: #555;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .tab-btn.active-push { background: #ff6a00; color: #fff; border-color: #ff6a00; }
+  .tab-btn.active-pull { background: #1e60a0; color: #fff; border-color: #1e60a0; }
+  .tab-btn.active-legs { background: #1a6b2a; color: #fff; border-color: #1a6b2a; }
+  .tab-btn.active-upper { background: #5a2a8a; color: #fff; border-color: #5a2a8a; }
+
+  /* DAY PANELS */
+  .day-panels { padding: 1rem 1.5rem 2rem; }
+  .day-panel { display: none; }
+  .day-panel.active { display: block; }
+
+  .day-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .day-color-bar {
+    width: 4px;
+    height: 52px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .push-bar { background: linear-gradient(180deg, #ff6a00, #ff3d00); }
+  .pull-bar { background: linear-gradient(180deg, #64b4ff, #1e60a0); }
+  .legs-bar { background: linear-gradient(180deg, #64dc78, #1a6b2a); }
+  .upper-bar { background: linear-gradient(180deg, #c896ff, #5a2a8a); }
+
+  .day-title-wrap .day-num { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: #555; }
+  .day-title-wrap .day-name { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.01em; line-height: 1.2; }
+  .day-title-wrap .day-muscles { font-size: 12px; color: #666; margin-top: 3px; }
+  .day-time { margin-left: auto; text-align: right; flex-shrink: 0; }
+  .time-val { font-size: 22px; font-weight: 700; color: #fff; }
+  .time-lbl { font-size: 10px; color: #444; text-transform: uppercase; letter-spacing: 0.1em; }
+
+  /* EXERCISE TABLE */
+  .phase-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #444;
+    margin: 1rem 0 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .phase-label::after { content: ''; flex: 1; height: 1px; background: #1a1a1a; }
+
+  .ex-list { display: flex; flex-direction: column; gap: 6px; }
+  .ex-card {
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px;
+    align-items: start;
+  }
+  .ex-card:hover { border-color: #2a2a2a; }
+  .ex-top { display: flex; align-items: center; gap: 8px; }
+  .ex-num { font-size: 10px; color: #333; font-weight: 700; min-width: 18px; }
+  .ex-name-text { font-size: 14px; font-weight: 600; color: #eee; }
+  .ex-tag {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .tag-compound { background: rgba(255,106,0,0.15); color: #ff6a00; }
+  .tag-iso { background: rgba(100,180,255,0.12); color: #64b4ff; }
+  .tag-core { background: rgba(200,150,255,0.12); color: #c896ff; }
+  .tag-cardio { background: rgba(100,220,120,0.12); color: #64dc78; }
+  .ex-tip { font-size: 11px; color: #555; margin-top: 4px; padding-left: 26px; line-height: 1.5; }
+  .ex-sets {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .sets-val { font-size: 14px; font-weight: 700; color: #fff; }
+  .sets-rest { font-size: 10px; color: #444; margin-top: 2px; }
+
+  /* FINISHER */
+  .finisher-box {
+    background: linear-gradient(135deg, rgba(255,106,0,0.08), rgba(255,60,0,0.04));
+    border: 1px solid rgba(255,106,0,0.2);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 0.5rem;
+  }
+  .finisher-title { font-size: 11px; font-weight: 700; color: #ff6a00; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .finisher-detail { font-size: 12px; color: #888; line-height: 1.7; }
+
+  /* NUTRITION QUICK */
+  .nutrition-bar {
+    margin: 0 1.5rem 1.5rem;
+    background: #0e0e0e;
+    border: 1px solid #1a1a1a;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+  }
+  .nut-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.75rem; }
+  .nut-chip {
+    flex: 1;
+    min-width: 70px;
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 8px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .nut-val { font-size: 16px; font-weight: 700; color: #fff; }
+  .nut-lbl { font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+  /* PROGRESSION */
+  .progression {
+    margin: 0 1.5rem 2rem;
+    background: #0e0e0e;
+    border: 1px solid #1a1a1a;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+  }
+  .prog-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #141414; align-items: flex-start; }
+  .prog-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .prog-week {
+    font-size: 10px;
+    font-weight: 700;
+    color: #ff6a00;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-width: 56px;
+    padding-top: 1px;
+  }
+  .prog-desc { font-size: 12px; color: #888; line-height: 1.6; }
+
+  /* MOBILE adjustments */
+  @media (max-width: 480px) {
+    .target-grid { grid-template-columns: repeat(3, 1fr); }
+    .week-grid { grid-template-columns: repeat(7, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Your transformation blueprint</div>
+  <h1 class="hero-title">Lean <span>Aesthetic</span><br>Physique Plan</h1>
+  <div class="hero-sub">Chest · Shoulders · Arms · Back · Core · Legs</div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val">5</div><div class="stat-lbl">Days/week</div></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><div class="stat-val">80</div><div class="stat-lbl">Min/session</div></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><div class="stat-val">2×</div><div class="stat-lbl">Each muscle</div></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><div class="stat-val">70kg</div><div class="stat-lbl">Start weight</div></div>
+  </div>
+</div>
+
+<!-- PHYSIQUE TARGETS -->
+<div class="target-section">
+  <div class="section-label">Target physique breakdown</div>
+  <div class="target-grid">
+    <div class="target-chip">
+      <div class="chip-icon">💪</div>
+      <div class="chip-name">Round Chest</div>
+      <div class="chip-goal">Full + defined</div>
+    </div>
+    <div class="target-chip">
+      <div class="chip-icon">🔺</div>
+      <div class="chip-name">3D Shoulders</div>
+      <div class="chip-goal">All 3 heads</div>
+    </div>
+    <div class="target-chip">
+      <div class="chip-icon">📐</div>
+      <div class="chip-name">V-Taper</div>
+      <div class="chip-goal">Wide + tight waist</div>
+    </div>
+    <div class="target-chip">
+      <div class="chip-icon">⚡</div>
+      <div class="chip-name">6-Pack Abs</div>
+      <div class="chip-goal">10–12% body fat</div>
+    </div>
+    <div class="target-chip">
+      <div class="chip-icon">🦾</div>
+      <div class="chip-name">Vascular Arms</div>
+      <div class="chip-goal">Bi + Tri both</div>
+    </div>
+    <div class="target-chip">
+      <div class="chip-icon">🦵</div>
+      <div class="chip-name">Balanced Legs</div>
+      <div class="chip-goal">Quads + Hams</div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK OVERVIEW -->
+<div class="week-overview">
+  <div class="section-label">Weekly structure</div>
+  <div class="week-grid">
+    <div class="week-day push">
+      <div class="wday-name">Mon</div>
+      <div class="wday-type push">Push</div>
+      <div class="wday-muscle">Chest<br>Shoulders<br>Triceps</div>
+    </div>
+    <div class="week-day pull">
+      <div class="wday-name">Tue</div>
+      <div class="wday-type pull">Pull</div>
+      <div class="wday-muscle">Back<br>Biceps<br>Rear Delt</div>
+    </div>
+    <div class="week-day legs">
+      <div class="wday-name">Wed</div>
+      <div class="wday-type legs">Legs</div>
+      <div class="wday-muscle">Quads<br>Hams<br>Glutes</div>
+    </div>
+    <div class="week-day rest">
+      <div class="wday-name">Thu</div>
+      <div class="wday-type rest">Rest</div>
+      <div class="wday-muscle">Recovery<br>+ Walk</div>
+    </div>
+    <div class="week-day upper">
+      <div class="wday-name">Fri</div>
+      <div class="wday-type upper">Upper</div>
+      <div class="wday-muscle">Full Upper<br>+ Core</div>
+    </div>
+    <div class="week-day legs">
+      <div class="wday-name">Sat</div>
+      <div class="wday-type legs">Legs+</div>
+      <div class="wday-muscle">Hams<br>Glutes<br>Calves</div>
+    </div>
+    <div class="week-day rest">
+      <div class="wday-name">Sun</div>
+      <div class="wday-type rest">Rest</div>
+      <div class="wday-muscle">Full<br>Rest</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-section">
+  <div class="section-label">Tap a day to see the full workout</div>
+  <div class="tabs">
+    <button class="tab-btn active-push" onclick="showDay('d1', this, 'push')">Mon — Push</button>
+    <button class="tab-btn" onclick="showDay('d2', this, 'pull')">Tue — Pull</button>
+    <button class="tab-btn" onclick="showDay('d3', this, 'legs')">Wed — Legs A</button>
+    <button class="tab-btn" onclick="showDay('d4', this, 'upper')">Fri — Upper</button>
+    <button class="tab-btn" onclick="showDay('d5', this, 'legs')">Sat — Legs B</button>
+  </div>
+</div>
+
+<!-- DAY PANELS -->
+<div class="day-panels">
+
+  <!-- DAY 1: PUSH -->
+  <div class="day-panel active" id="d1">
+    <div class="day-header">
+      <div class="day-color-bar push-bar"></div>
+      <div class="day-title-wrap">
+        <div class="day-num">Monday · Day 1</div>
+        <div class="day-name">Push Day</div>
+        <div class="day-muscles">Chest · Shoulders · Triceps</div>
+      </div>
+      <div class="day-time"><div class="time-val">80</div><div class="time-lbl">Minutes</div></div>
+    </div>
+
+    <div class="phase-label">Warm-up — 8 min</div>
+    <div class="finisher-box" style="border-color: rgba(255,255,255,0.08); background: #0e0e0e;">
+      <div class="finisher-detail">Arm circles 30 sec · Band pull-aparts ×15 · Incline push-ups ×12 · Light DB press ×10 · Shoulder rotations 30 sec</div>
+    </div>
+
+    <div class="phase-label">Strength block — 35 min</div>
+    <div class="ex-list">
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">01</span><span class="ex-name-text">Barbell Bench Press</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">4×5–6 reps. Go heavy. Chest high, shoulder blades pinched back. This is your main chest strength builder.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">4×5</div><div class="sets-rest">3 min rest</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">02</span><span class="ex-name-text">Overhead Barbell Press</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">4×6–8 reps. Standing or seated. Brace core. This builds the 3D capped shoulder look.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">4×6</div><div class="sets-rest">2.5 min rest</div></div>
+      </div>
+    </div>
+
+    <div class="phase-label">Hypertrophy block — 25 min</div>
+    <div class="ex-list">
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">03</span><span class="ex-name-text">Incline DB Press</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">3×10–12. 30–45° incline. Builds the upper chest that gives fullness at the collarbone area.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×10</div><div class="sets-rest">90 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">04</span><span class="ex-name-text">Cable Lateral Raise</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">3×15–20. Single arm, cable at lowest point. Pinky slightly up. Side delts = shoulder width. Essential for V-taper.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×15</div><div class="sets-rest">60 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">05</span><span class="ex-name-text">Cable Chest Fly</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">3×12–15. Cables set high for lower chest. Deep stretch at top, squeeze at bottom. Gives chest that defined chest-line.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×12</div><div class="sets-rest">60 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">06</span><span class="ex-name-text">Tricep Pushdown + Overhead Extension</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">2×12 each. Superset these two. Pushdown = lateral head. Overhead = long head. Together = full tricep.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">2×12</div><div class="sets-rest">60 sec</div></div>
+      </div>
+    </div>
+
+    <div class="phase-label">Finisher — 8 min</div>
+    <div class="finisher-box">
+      <div class="finisher-title">🔥 Chest & Shoulder burn</div>
+      <div class="finisher-detail">3 rounds no rest: Push-ups ×15 → DB lateral raise ×12 → Diamond push-ups ×10. 45 sec between rounds.</div>
+    </div>
+  </div>
+
+  <!-- DAY 2: PULL -->
+  <div class="day-panel" id="d2">
+    <div class="day-header">
+      <div class="day-color-bar pull-bar"></div>
+      <div class="day-title-wrap">
+        <div class="day-num">Tuesday · Day 2</div>
+        <div class="day-name">Pull Day</div>
+        <div class="day-muscles">Back Width · Back Thickness · Biceps · Rear Delts</div>
+      </div>
+      <div class="day-time"><div class="time-val">80</div><div class="time-lbl">Minutes</div></div>
+    </div>
+
+    <div class="phase-label">Warm-up — 8 min</div>
+    <div class="finisher-box" style="border-color: rgba(255,255,255,0.08); background: #0e0e0e;">
+      <div class="finisher-detail">Band pull-aparts ×20 · Face pulls ×15 · Dead hang 20 sec × 3 · Scapular pull-ups ×8</div>
+    </div>
+
+    <div class="phase-label">Strength block — 35 min</div>
+    <div class="ex-list">
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">01</span><span class="ex-name-text">Weighted Pull-ups</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">4×5–6. Add 5–10 kg if regular pull-ups feel easy. Full range. This builds the wide back that creates the V-taper in that physique.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">4×5</div><div class="sets-rest">3 min rest</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">02</span><span class="ex-name-text">Barbell Pendlay Row</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">4×6–8. Bar rests on floor each rep. Explosive pull, pause at chest. Builds back thickness — the 3D look from the side.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">4×6</div><div class="sets-rest">2.5 min rest</div></div>
+      </div>
+    </div>
+
+    <div class="phase-label">Hypertrophy block — 25 min</div>
+    <div class="ex-list">
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">03</span><span class="ex-name-text">Seated Cable Row</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">3×10–12. Drive elbows back. Squeeze rhomboids at the end. Mid-back fullness.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×10</div><div class="sets-rest">90 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">04</span><span class="ex-name-text">Face Pulls</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">3×15–20. Rope at eye level. External rotation at the end of every rep. Rear delts + rotator cuff health. Non-negotiable.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×15</div><div class="sets-rest">60 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">05</span><span class="ex-name-text">Barbell Curl</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">3×8–10. No swinging. Slow 3-sec lowering. Builds the bicep peak visible in that reference physique.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×8</div><div class="sets-rest">90 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">06</span><span class="ex-name-text">Hammer Curl</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">3×10–12. Neutral grip. Works brachialis — adds arm thickness and that vascular look on the forearm.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×10</div><div class="sets-rest">60 sec</div></div>
+      </div>
+    </div>
+
+    <div class="phase-label">Finisher — 8 min</div>
+    <div class="finisher-box">
+      <div class="finisher-title">🔥 Back & Arm pump</div>
+      <div class="finisher-detail">3 rounds: Bodyweight rows ×12 → Band pull-aparts ×15 → Dead hang 20 sec. 40 sec rest between rounds.</div>
+    </div>
+  </div>
+
+  <!-- DAY 3: LEGS A -->
+  <div class="day-panel" id="d3">
+    <div class="day-header">
+      <div class="day-color-bar legs-bar"></div>
+      <div class="day-title-wrap">
+        <div class="day-num">Wednesday · Day 3</div>
+        <div class="day-name">Legs A</div>
+        <div class="day-muscles">Quads · Glutes · Calves · Core</div>
+      </div>
+      <div class="day-time"><div class="time-val">80</div><div class="time-lbl">Minutes</div></div>
+    </div>
+
+    <div class="phase-label">Warm-up — 8 min</div>
+    <div class="finisher-box" style="border-color: rgba(255,255,255,0.08); background: #0e0e0e;">
+      <div class="finisher-detail">Hip circles ×10 each · Leg swings ×12 each · Goblet squat ×10 (light) · Glute bridge ×15 · Banded clamshells ×15 each</div>
+    </div>
+
+    <div class="phase-label">Strength block — 30 min</div>
+    <div class="ex-list">
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">01</span><span class="ex-name-text">Back Squat (Barbell)</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">4×5–6. Hit parallel or below. Knees track over toes. The king of leg exercises — builds quads, glutes, and core stability simultaneously.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">4×5</div><div class="sets-rest">3 min rest</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">02</span><span class="ex-name-text">Bulgarian Split Squat</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">3×8–10 each leg. Rear foot elevated. Front foot far enough that shin stays vertical. Brutal but unmatched for single-leg quad + glute development.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×8</div><div class="sets-rest">2 min rest</div></div>
+      </div>
+    </div>
+
+    <div class="phase-label">Hypertrophy block — 25 min</div>
+    <div class="ex-list">
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">03</span><span class="ex-name-text">Leg Press</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">3×12–15. Feet high on plate = more glute. Feet low = more quad. Go deep without lower back rounding off the seat.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×12</div><div class="sets-rest">90 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">04</span><span class="ex-name-text">Leg Extension</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">3×15. Pause 1 sec at full extension. Pure quad isolation — builds that defined teardrop shape above the knee.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×15</div><div class="sets-rest">60 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">05</span><span class="ex-name-text">Standing Calf Raise</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">4×20. Full stretch at bottom, full contraction at top. Hold 1 sec at peak. Calves need high reps to grow — don't skip them.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">4×20</div><div class="sets-rest">45 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">06</span><span class="ex-name-text">Ab Circuit</span><span class="ex-tag tag-core">Core</span></div>
+          <div class="ex-tip">3 rounds: Hanging knee raise ×15 → Plank 40 sec → Ab wheel rollout ×8. Core is what shows at 10–12% body fat. Train it seriously.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3 rounds</div><div class="sets-rest">60 sec</div></div>
+      </div>
+    </div>
+
+    <div class="phase-label">Finisher — 5 min</div>
+    <div class="finisher-box">
+      <div class="finisher-title">⚡ Athletic power</div>
+      <div class="finisher-detail">2 rounds: Jump squat ×10 → Box step-up ×10 each → Wall sit 30 sec. Builds athletic explosiveness.</div>
+    </div>
+  </div>
+
+  <!-- DAY 4: UPPER -->
+  <div class="day-panel" id="d4">
+    <div class="day-header">
+      <div class="day-color-bar upper-bar"></div>
+      <div class="day-title-wrap">
+        <div class="day-num">Friday · Day 4</div>
+        <div class="day-name">Full Upper</div>
+        <div class="day-muscles">Chest · Back · Shoulders · Arms · Core</div>
+      </div>
+      <div class="day-time"><div class="time-val">80</div><div class="time-lbl">Minutes</div></div>
+    </div>
+
+    <div class="phase-label">Warm-up — 8 min</div>
+    <div class="finisher-box" style="border-color: rgba(255,255,255,0.08); background: #0e0e0e;">
+      <div class="finisher-detail">Same as Monday push + add lat stretches and shoulder band rotations. Full upper body activation needed today.</div>
+    </div>
+
+    <div class="phase-label">Upper body volume — 50 min</div>
+    <div class="ex-list">
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">01</span><span class="ex-name-text">DB Bench Press</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">3×10–12. Dumbbells allow more stretch than barbell. Full ROM every rep. This is your 2nd chest hit — higher reps than Monday.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×10</div><div class="sets-rest">2 min</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">02</span><span class="ex-name-text">Lat Pulldown (Wide Grip)</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">3×10–12. Pull to upper chest. Lean back slightly. 2nd lat hit — builds the width for V-taper. Don't use momentum.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×10</div><div class="sets-rest">90 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">03</span><span class="ex-name-text">Arnold Press</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">3×10–12. The rotation hits all 3 delt heads in one movement. Best shoulder exercise for a fully round, 3D look.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×10</div><div class="sets-rest">90 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">04</span><span class="ex-name-text">Single Arm DB Row</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">3×12 each. Elbow drives straight back. Full stretch at bottom. Builds mid-back unilateral strength.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×12</div><div class="sets-rest">90 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">05</span><span class="ex-name-text">DB Lateral Raise</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">3×15–20. 2 regular sets then 1 drop set. Slow and controlled. Side delt width is your most visible muscle in a T-shirt.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×15</div><div class="sets-rest">60 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">06</span><span class="ex-name-text">Superset: Incline Curl + Skull Crusher</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">3×10 each, no rest between. Incline curl = max bicep stretch. Skull crusher = long head tricep. Both arms trained in same superset = time efficient.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×10</div><div class="sets-rest">90 sec</div></div>
+      </div>
+    </div>
+
+    <div class="phase-label">Core — 8 min</div>
+    <div class="ex-list">
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">07</span><span class="ex-name-text">Core Finisher</span><span class="ex-tag tag-core">Core</span></div>
+          <div class="ex-tip">3 rounds: Hanging leg raise ×12 → Cable crunch ×15 → Oblique crunch ×10 each side. Abs need direct work to show at low body fat.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3 rounds</div><div class="sets-rest">60 sec</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 5: LEGS B -->
+  <div class="day-panel" id="d5">
+    <div class="day-header">
+      <div class="day-color-bar legs-bar"></div>
+      <div class="day-title-wrap">
+        <div class="day-num">Saturday · Day 5</div>
+        <div class="day-name">Legs B</div>
+        <div class="day-muscles">Hamstrings · Glutes · Calves · Lower Back</div>
+      </div>
+      <div class="day-time"><div class="time-val">80</div><div class="time-lbl">Minutes</div></div>
+    </div>
+
+    <div class="phase-label">Warm-up — 8 min</div>
+    <div class="finisher-box" style="border-color: rgba(255,255,255,0.08); background: #0e0e0e;">
+      <div class="finisher-detail">Hip hinges ×10 · RDL with broomstick ×10 · Glute bridge ×15 · Good morning ×10 (light) · Ankle circles ×10 each</div>
+    </div>
+
+    <div class="phase-label">Strength block — 30 min</div>
+    <div class="ex-list">
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">01</span><span class="ex-name-text">Conventional Deadlift</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">4×4–5. The most important lift in the plan. Builds posterior chain — hamstrings, glutes, lower back, traps. Hinge at hips, neutral spine, push the floor away.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">4×4</div><div class="sets-rest">3 min rest</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">02</span><span class="ex-name-text">Romanian Deadlift (RDL)</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">3×8–10. Keep legs nearly straight. Feel hamstring stretch at bottom. Hips drive forward on the way up. Builds that hamstring sweep visible from the front.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×8</div><div class="sets-rest">2 min rest</div></div>
+      </div>
+    </div>
+
+    <div class="phase-label">Hypertrophy block — 30 min</div>
+    <div class="ex-list">
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">03</span><span class="ex-name-text">Lying Leg Curl</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">3×12–15. Slow 3-sec eccentric on the way down. This is your dedicated hamstring isolation — balances out quad-heavy Legs A day.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×12</div><div class="sets-rest">90 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">04</span><span class="ex-name-text">Hip Thrust (Barbell)</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">3×12–15. Upper back on bench, bar across hips. Squeeze glutes hard at top. Best glute builder — gives that athletic posterior look from the side.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×12</div><div class="sets-rest">90 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">05</span><span class="ex-name-text">Seated Calf Raise</span><span class="ex-tag tag-iso">Isolation</span></div>
+          <div class="ex-tip">4×15–20. Seated targets soleus (different to standing). Full stretch + full contraction every rep. Calf 2nd hit this week.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">4×15</div><div class="sets-rest">45 sec</div></div>
+      </div>
+      <div class="ex-card">
+        <div>
+          <div class="ex-top"><span class="ex-num">06</span><span class="ex-name-text">Nordic Curl / Glute Ham Raise</span><span class="ex-tag tag-compound">Compound</span></div>
+          <div class="ex-tip">3×6–8. One of the hardest hamstring exercises. Knees anchored, lower yourself as slowly as possible. Builds hamstring strength and injury resistance.</div>
+        </div>
+        <div class="ex-sets"><div class="sets-val">3×6</div><div class="sets-rest">2 min</div></div>
+      </div>
+    </div>
+
+    <div class="phase-label">Finisher — 5 min</div>
+    <div class="finisher-box">
+      <div class="finisher-title">🔥 Posterior chain burnout</div>
+      <div class="finisher-detail">Glute bridge ×20 → Reverse hyperextension ×15 → Single-leg hip thrust ×10 each. 2 rounds. Burn every last hamstring and glute fibre.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- NUTRITION -->
+<div class="nutrition-bar">
+  <div class="section-label">Daily nutrition targets · 70 kg lean gain</div>
+  <div class="nut-row">
+    <div class="nut-chip"><div class="nut-val">2800</div><div class="nut-lbl">Calories</div></div>
+    <div class="nut-chip"><div class="nut-val">160g</div><div class="nut-lbl">Protein</div></div>
+    <div class="nut-chip"><div class="nut-val">320g</div><div class="nut-lbl">Carbs</div></div>
+    <div class="nut-chip"><div class="nut-val">75g</div><div class="nut-lbl">Fats</div></div>
+    <div class="nut-chip"><div class="nut-val">5g</div><div class="nut-lbl">Creatine</div></div>
+  </div>
+</div>
+
+<!-- PROGRESSION -->
+<div class="progression">
+  <div class="section-label">How to progress month by month</div>
+  <div class="prog-item">
+    <div class="prog-week">Wk 1–4</div>
+    <div class="prog-desc">Learn the movements. Focus on form, not weight. Add 1 rep per exercise each session. Build the mind-muscle connection.</div>
+  </div>
+  <div class="prog-item">
+    <div class="prog-week">Wk 5–8</div>
+    <div class="prog-desc">Start adding 2.5–5 kg to compound lifts when you hit the top rep range. Push harder on isolation work with drop sets.</div>
+  </div>
+  <div class="prog-item">
+    <div class="prog-week">Wk 9</div>
+    <div class="prog-desc">Deload week. Same exercises, 40% less volume and load. Let your tendons, joints and nervous system recover.</div>
+  </div>
+  <div class="prog-item">
+    <div class="prog-week">Wk 10+</div>
+    <div class="prog-desc">Start a new cycle at higher weights. Track your lifts every session — if it's not written down, it's not progressive overload.</div>
+  </div>
+</div>
+
+<script>
+  function showDay(id, btn, type) {
+    document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.className = 'tab-btn';
+    });
+    btn.className = 'tab-btn active-' + type;
+  }
+</script>
+</body>
+</html>

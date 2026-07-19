@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>42-Day SDE Sprint — Ansh</title>
+<style>
+:root {
+  --bg: #14161c;
+  --panel: #1b1e26;
+  --panel-2: #21242e;
+  --border: rgba(231,228,221,0.09);
+  --text: #e7e4dd;
+  --muted: #8b8fa3;
+  --green: #3fb950;
+  --green-dim: rgba(63,185,80,0.16);
+  --amber: #d29922;
+  --amber-dim: rgba(210,153,34,0.16);
+  --mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', Consolas, Menlo, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+.sr-only {
+  position: absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+.wrap { max-width: 900px; margin: 0 auto; padding: 24px 20px 60px; }
+
+/* Terminal header */
+.term {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  background: var(--panel);
+}
+.term-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--border);
+}
+.dot { width: 11px; height: 11px; border-radius: 50%; display:inline-block; }
+.dot.red { background: #DA5A5A; }
+.dot.amber { background: var(--amber); }
+.dot.green { background: var(--green); }
+.term-title { margin-left: 8px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.term-body { padding: 18px 20px 20px; font-family: var(--mono); font-size: 13px; line-height: 1.9; }
+.prompt { color: var(--green); }
+.term-line { opacity: 0; transform: translateY(4px); animation: lineIn 0.4s ease-out forwards; }
+.term-line.dim { color: var(--muted); }
+.term-line:nth-of-type(1) { animation-delay: 0.05s; }
+.term-line:nth-of-type(2) { animation-delay: 0.4s; }
+.term-line:nth-of-type(3) { animation-delay: 0.75s; }
+@keyframes lineIn { to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .term-line { animation: none; opacity: 1; transform: none; }
+}
+.hint { font-size: 12.5px; color: var(--muted); margin: 0 0 20px; padding: 0 2px; }
+
+/* Stats */
+.stats { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.stat { flex: 1; min-width: 120px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+.stat-num { display: block; font-family: var(--mono); font-size: 26px; font-weight: 600; color: var(--text); }
+.stat-label { display: block; font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+
+/* Graph */
+.graph-section { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; margin-bottom: 16px; overflow-x: auto; }
+.graph { display: grid; grid-template-columns: 26px repeat(7, 1fr); gap: 4px; min-width: 300px; }
+.graph-row-label { font-family: var(--mono); font-size: 10px; color: var(--muted); display: flex; align-items: center; }
+.cell { aspect-ratio: 1; border-radius: 3px; background: var(--panel-2); border: 1px solid var(--border); cursor: pointer; transition: background 0.25s, transform 0.15s; padding: 0; }
+.cell:hover { transform: scale(1.15); }
+.cell.partial { background: var(--amber-dim); border-color: var(--amber); }
+.cell.done { background: var(--green); border-color: var(--green); }
+.cell:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.graph-legend { display: flex; gap: 16px; margin-top: 12px; font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 9px; height: 9px; border-radius: 2px; background: var(--panel-2); border: 1px solid var(--border); display: inline-block; }
+.legend-dot.partial { background: var(--amber-dim); border-color: var(--amber); }
+.legend-dot.done { background: var(--green); border-color: var(--green); }
+
+/* Cheat sheet */
+.cheatsheet { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; padding: 4px 18px; }
+.cheatsheet summary { cursor: pointer; padding: 12px 0; font-family: var(--mono); font-size: 13px; color: var(--muted); list-style: none; }
+.cheatsheet summary::-webkit-details-marker { display: none; }
+.cheatsheet summary::before { content: '▸ '; color: var(--green); }
+.cheatsheet[open] summary::before { content: '▾ '; }
+.cheat-body { padding: 4px 0 18px; }
+.cheat-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+.cheat-table th, .cheat-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.cheat-table th { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; }
+.cheat-table a { color: var(--green); text-decoration: none; }
+.cheat-table a:hover { text-decoration: underline; }
+.cheat-note { font-size: 12.5px; color: var(--muted); border-left: 2px solid var(--amber); padding-left: 10px; margin: 10px 0; }
+
+/* Tabs */
+.tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 16px; padding: 4px 2px; position: sticky; top: 0; background: var(--bg); z-index: 5; }
+.tab { font-family: var(--mono); font-size: 12px; padding: 8px 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; color: var(--muted); cursor: pointer; white-space: nowrap; transition: background 0.2s, color 0.2s, border-color 0.2s; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--bg); background: var(--green); border-color: var(--green); font-weight: 600; }
+
+/* Week panels */
+.week-panel { display: none; }
+.week-panel.active { display: block; }
+.week-header { font-family: var(--mono); font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 4px 0 14px; }
+.week-header strong { color: var(--text); }
+
+.day-card { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--border); border-radius: 8px; padding: 16px 18px; margin-bottom: 12px; transition: border-color 0.3s; }
+.day-card.partial { border-left-color: var(--amber); }
+.day-card.done { border-left-color: var(--green); }
+.day-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.day-num { font-family: var(--mono); font-size: 12px; color: var(--muted); flex-shrink: 0; }
+.day-summary { font-size: 14px; color: var(--text); flex: 1; min-width: 180px; }
+.day-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.day-time { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.day-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 10px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+.day-badge.partial { color: var(--amber); border-color: var(--amber); }
+.day-badge.done { color: var(--green); border-color: var(--green); background: var(--green-dim); }
+
+.task-group-label { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin: 10px 0 4px; opacity: 0.85; }
+.task-group-label:first-of-type { margin-top: 2px; }
+.task { display: flex; align-items: flex-start; gap: 10px; padding: 5px 0; cursor: pointer; }
+.task input[type="checkbox"] { margin-top: 3px; width: 15px; height: 15px; accent-color: var(--green); flex-shrink: 0; cursor: pointer; }
+.task span { font-size: 13.5px; line-height: 1.5; color: var(--text); }
+.task input:checked ~ span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--green); }
+
+footer { text-align: center; margin-top: 28px; }
+#resetBtn { font-family: var(--mono); font-size: 11px; color: var(--muted); background: none; border: 1px solid var(--border); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+#resetBtn:hover { color: var(--text); border-color: var(--muted); }
+.foot-note { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 14px; }
+
+@media (max-width: 560px) {
+  .wrap { padding: 16px 12px 40px; }
+  .stat-num { font-size: 22px; }
+  .graph { grid-template-columns: 18px repeat(7, 1fr); gap: 3px; }
+  .term-body { font-size: 11.5px; }
+  .day-summary { min-width: 100%; order: 3; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="sr-only">42-Day SDE Sprint Checklist</h1>
+
+  <header class="term">
+    <div class="term-bar">
+      <span class="dot red"></span><span class="dot amber"></span><span class="dot green"></span>
+      <span class="term-title">ansh@career — restart.sh</span>
+    </div>
+    <div class="term-body">
+      <div class="term-line"><span class="prompt">ansh@localhost ~ %</span> ./restart-career.sh --weeks 6</div>
+      <div class="term-line dim">&gt; track: product companies &middot; dsa: rusty, not zero &middot; projects: need independent defense</div>
+      <div class="term-line dim">&gt; 42 days loaded. let&rsquo;s go.</div>
+    </div>
+  </header>
+
+  <p class="hint">Check tasks off as you go &mdash; it saves automatically, even if you close the tab. Click a cell below to jump to that day.</p>
+
+  <section class="stats">
+    <div class="stat"><span class="stat-num" id="statDays">0/42</span><span class="stat-label">days merged</span></div>
+    <div class="stat"><span class="stat-num" id="statStreak">0</span><span class="stat-label">day streak</span></div>
+    <div class="stat"><span class="stat-num" id="statTasks">0%</span><span class="stat-label">tasks shipped</span></div>
+  </section>
+
+  <section class="graph-section">
+    <div class="graph" id="graph"></div>
+    <div class="graph-legend">
+      <span class="legend-item"><span class="legend-dot"></span>not started</span>
+      <span class="legend-item"><span class="legend-dot partial"></span>in progress</span>
+      <span class="legend-item"><span class="legend-dot done"></span>merged</span>
+    </div>
+  </section>
+
+  <details class="cheatsheet">
+    <summary>Cheat sheet &mdash; resources, platforms, pacing</summary>
+    <div class="cheat-body">
+      <table class="cheat-table">
+        <tr><th>DSA resource</th><th>Use it for</th></tr>
+        <tr><td><a href="https://neetcode.io" target="_blank" rel="noopener">NeetCode 150</a></td><td>Primary track &mdash; curated, video walkthroughs, best for rebuilding fundamentals from rusty</td></tr>
+        <tr><td><a href="https://takeuforward.org" target="_blank" rel="noopener">Striver&rsquo;s SDE Sheet</a></td><td>Secondary &mdash; extra reps in weak spots once fundamentals are back; matches what Indian product companies and FAANG-India offices actually test</td></tr>
+      </table>
+      <table class="cheat-table">
+        <tr><th>Platform</th><th>What&rsquo;s different about it</th></tr>
+        <tr><td><a href="https://linkedin.com" target="_blank" rel="noopener">LinkedIn</a></td><td>Set to Open to Work; your optimized headline and About do the work</td></tr>
+        <tr><td><a href="https://wellfound.com" target="_blank" rel="noopener">Wellfound</a></td><td>Connects you directly to startup founders and hiring managers</td></tr>
+        <tr><td><a href="https://instahyre.com" target="_blank" rel="noopener">Instahyre</a></td><td>Inbound &mdash; recruiters approach pre-screened candidates</td></tr>
+        <tr><td><a href="https://cutshort.io" target="_blank" rel="noopener">Cutshort</a></td><td>Matches on skills, not just resume keywords</td></tr>
+      </table>
+      <p class="cheat-note">Don&rsquo;t hop between DSA sheets from day one &mdash; that&rsquo;s the actual trap, not which one you pick.</p>
+      <p class="cheat-note">Running DSSSB prep alongside this? Protect the DSA and Apply blocks first if a day gets tight &mdash; Build, Defend, and Prep can flex.</p>
+    </div>
+  </details>
+
+  <nav class="tabs" id="tabs"></nav>
+  <main id="weekPanels"></main>
+
+  <footer>
+    <button id="resetBtn" type="button">Reset progress</button>
+    <p class="foot-note">The calendar isn&rsquo;t the point &mdash; the compounding is.</p>
+  </footer>
+</div>
+
+<script>
+const WEEKS = [
+  { n:1, title:"Foundations & First Contact", days:[
+    { day:1, time:"~6-7h", summary:"Resume, CampusMart defense, DSA diagnostic, infra", tasks:[
+      {g:"PREP", t:"Update the CGPA line now that you\u2019ve graduated \u2014 drop \u201Ctill 7th sem\u201D"},
+      {g:"PREP", t:"Add direct repo links under CampusMart and SkillSwap, not just your handle at the top"},
+      {g:"PREP", t:"Link live demos for CampusMart and SkillSwap if they\u2019re still deployed"},
+      {g:"PREP", t:"Open your resume and fix the icon-font glitch in the header (odd \u00EF / \u00A7 characters)"},
+      {g:"PREP", t:"Rate yourself honestly on DSA, OOP, DBMS, OS, and Computer Networks \u2014 note the weakest one"},
+      {g:"DEFEND", t:"CampusMart: open every file, write why (not just what) for your JWT auth, RBAC, image-upload validation, and Cloudinary integration"},
+      {g:"DEFEND", t:"Write 6-8 likely CampusMart interview questions and answer them unaided"},
+      {g:"DSA", t:"Diagnostic: 8-10 easy problems on NeetCode across arrays, strings, and hashmaps \u2014 note exactly where you got stuck"},
+      {g:"APPLY", t:"Set LinkedIn to \u201COpen to Work\u201D and confirm your headline and About are live"},
+      {g:"APPLY", t:"Create accounts on Wellfound, Instahyre, and Cutshort"},
+      {g:"APPLY", t:"Start a plain spreadsheet: company, role, date applied, status"}
+    ]},
+    { day:2, time:"~4-5h", summary:"SkillSwap defense + arrays + first applications", tasks:[
+      {g:"DEFEND", t:"SkillSwap: explain your Zod validation, User model, auth utilities, and Socket.io chat in your own words"},
+      {g:"DEFEND", t:"Write 6-8 likely SkillSwap interview questions and answer them unaided"},
+      {g:"DSA", t:"Arrays on NeetCode"},
+      {g:"APPLY", t:"Send 3-5 applications matching your current stack"}
+    ]},
+    { day:3, time:"~4h", summary:"Strings, hashmaps + patent prep", tasks:[
+      {g:"DSA", t:"Strings and hashmaps on NeetCode"},
+      {g:"DEFEND", t:"Write out your personal contribution to the patent \u2014 telemetry simulation, carbon-intensity modeling, SLA constraints, the gradient-boosting decision engine \u2014 versus the wider disclosure"},
+      {g:"APPLY", t:"Send 3-5 applications"}
+    ]},
+    { day:4, time:"~4h", summary:"Two pointers, sliding window + CampusMart dry run", tasks:[
+      {g:"DSA", t:"Two pointers and sliding window on NeetCode"},
+      {g:"PREP", t:"Record yourself explaining CampusMart in under 3 minutes, then play it back"},
+      {g:"APPLY", t:"Send 3-5 applications"}
+    ]},
+    { day:5, time:"~4h", summary:"Mixed review + behavioral pitch", tasks:[
+      {g:"DSA", t:"Timed mixed review of this week\u2019s topics"},
+      {g:"PREP", t:"Draft your 60-second \u201Ctell me about yourself\u201D and \u201Cwhy should we hire you\u201D answers"},
+      {g:"APPLY", t:"Send applications, follow up on Day 1 sends with zero response"}
+    ]},
+    { day:6, time:"~4h", summary:"SkillSwap dry run + gap patching", tasks:[
+      {g:"DEFEND", t:"Full dry run: explain SkillSwap out loud, unaided, timed \u2014 note every stumble"},
+      {g:"DSA", t:"Patch the gaps you found this week"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:7, time:"~1h", summary:"Weekly review \u2014 rest", tasks:[
+      {g:"REVIEW", t:"Update your spreadsheet \u2014 sent, replies, silence"},
+      {g:"REVIEW", t:"Note which DSA topics are still shaky going into Week 2"},
+      {g:"REVIEW", t:"Pick your Week 2 proof project tonight (see cheat sheet)"},
+      {g:"REVIEW", t:"No grinding today \u2014 recharge"}
+    ]}
+  ]},
+  { n:2, title:"Prove You Can Build It Alone", days:[
+    { day:8, time:"~5-6h", summary:"Lock and scaffold your Week 2 project", tasks:[
+      {g:"BUILD", t:"Lock your Week 2 project \u2014 DevNotes or the Habit Tracker API from your JS mastery lab, your patent\u2019s Colab notebook, or something new and small: a URL shortener with click analytics, a rate limiter, or an LRU cache"},
+      {g:"BUILD", t:"Scaffold it on paper first \u2014 AI can explain a concept, never write the code"},
+      {g:"DSA", t:"Recursion basics"},
+      {g:"APPLY", t:"Send 3-5 applications"}
+    ]},
+    { day:9, time:"~5h", summary:"Core logic, recursion \u2192 trees", tasks:[
+      {g:"BUILD", t:"Core logic, written yourself"},
+      {g:"DSA", t:"Recursion, then intro trees"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:10, time:"~5h", summary:"Core logic + tests, tree traversals", tasks:[
+      {g:"BUILD", t:"Core logic continued, plus basic tests"},
+      {g:"DSA", t:"Tree traversals"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:11, time:"~5h", summary:"Polish + edge cases, basic graphs", tasks:[
+      {g:"BUILD", t:"Polish and edge cases"},
+      {g:"DSA", t:"Basic graphs \u2014 BFS and DFS"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:12, time:"~4-5h", summary:"Deploy + README, intro DP", tasks:[
+      {g:"BUILD", t:"Deploy it, then write a real README \u2014 the problem, why you built it this way, what\u2019s next"},
+      {g:"DSA", t:"Intro DP"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:13, time:"~3-4h", summary:"First mock interview", tasks:[
+      {g:"PREP", t:"Mock interview #1 \u2014 narrate your thinking out loud on a live problem"},
+      {g:"DSA", t:"Light review"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:14, time:"~1h", summary:"Weekly review \u2014 rest", tasks:[
+      {g:"REVIEW", t:"Add the Week 2 project to your resume, with a real number if you have one"},
+      {g:"REVIEW", t:"Write down what the mock interview actually surfaced"},
+      {g:"REVIEW", t:"Rest"}
+    ]}
+  ]},
+  { n:3, title:"Depth & Active Recall", days:[
+    { day:15, time:"~4h", summary:"Graphs + revisit Week 1 problems", tasks:[
+      {g:"DSA", t:"Graphs \u2014 weighted, shortest-path basics"},
+      {g:"DSA", t:"Revisit 3 Week 1 problems from memory, no peeking"},
+      {g:"APPLY", t:"Send 5+ applications"}
+    ]},
+    { day:16, time:"~4h", summary:"DP patterns + more Week 1 recall", tasks:[
+      {g:"DSA", t:"DP \u2014 0/1 knapsack-style patterns"},
+      {g:"DSA", t:"Revisit 3 more Week 1 problems from memory"},
+      {g:"APPLY", t:"Send 5+ applications"}
+    ]},
+    { day:17, time:"~4h", summary:"DP + \u201Cwhy this company\u201D drafts", tasks:[
+      {g:"DSA", t:"DP \u2014 subsequence patterns"},
+      {g:"PREP", t:"Draft a \u201Cwhy this company\u201D template, then tailor it for 2 real targets"},
+      {g:"APPLY", t:"Send 5+ applications"}
+    ]},
+    { day:18, time:"~4h", summary:"Timed mock technical round #1", tasks:[
+      {g:"PREP", t:"Timed mock technical round #1"},
+      {g:"DSA", t:"Light review"},
+      {g:"APPLY", t:"Send 5+ applications"}
+    ]},
+    { day:19, time:"~4h", summary:"Mixed graphs/DP + Week 2 recall", tasks:[
+      {g:"DSA", t:"Mixed timed set \u2014 graphs and DP"},
+      {g:"DSA", t:"Revisit 3 Week 2 problems from memory"},
+      {g:"APPLY", t:"Send 5+ applications"}
+    ]},
+    { day:20, time:"~3-4h", summary:"Sharpen your challenge story", tasks:[
+      {g:"PREP", t:"Sharpen your \u201Cwalk me through a challenge\u201D story \u2014 the patent or a real bug from CampusMart/SkillSwap"},
+      {g:"DSA", t:"Practice set"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:21, time:"~1h", summary:"Weekly review \u2014 rest", tasks:[
+      {g:"REVIEW", t:"Check response rate \u2014 is one platform outperforming the others?"},
+      {g:"REVIEW", t:"Note DSA topics that are solid vs. still shaky"},
+      {g:"REVIEW", t:"Rest"}
+    ]}
+  ]},
+  { n:4, title:"Mock Rounds & Targeting", days:[
+    { day:22, time:"~4h", summary:"Harder DP + remaining recall", tasks:[
+      {g:"DSA", t:"DP \u2014 harder patterns"},
+      {g:"DSA", t:"Revisit remaining Week 2 problems from memory"},
+      {g:"APPLY", t:"Send 5-8 applications"}
+    ]},
+    { day:23, time:"~4h", summary:"Mixed set + mock interview #2", tasks:[
+      {g:"DSA", t:"Mixed timed set"},
+      {g:"PREP", t:"Mock interview #2 \u2014 technical"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:24, time:"~4h", summary:"Combined problems + company targeting", tasks:[
+      {g:"DSA", t:"Combined graphs and DP problems"},
+      {g:"PREP", t:"Tailor your resume or note for product-company vs. startup targets"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:25, time:"~4h", summary:"Timed mock technical round #2", tasks:[
+      {g:"PREP", t:"Timed mock technical round #2"},
+      {g:"DSA", t:"Light review"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:26, time:"~4h", summary:"Full random mixed set", tasks:[
+      {g:"DSA", t:"Full random mixed set, timed \u2014 every topic so far"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:27, time:"~3-4h", summary:"Mock behavioral round", tasks:[
+      {g:"PREP", t:"Mock behavioral round \u2014 record yourself, out loud, no script"},
+      {g:"DSA", t:"Practice set"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:28, time:"~1h", summary:"Full check-in \u2014 rest", tasks:[
+      {g:"REVIEW", t:"Full check-in: applications sent, interviews landed, response rate"},
+      {g:"REVIEW", t:"Mark which DSA topics need attention in Weeks 5-6"},
+      {g:"REVIEW", t:"Rest"}
+    ]}
+  ]},
+  { n:5, title:"Interview Mode I", days:[
+    { day:29, time:"~3h", summary:"Broad applications + DSA maintenance", tasks:[
+      {g:"APPLY", t:"Broad push \u2014 8-10 applications"},
+      {g:"DSA", t:"Maintenance \u2014 timed mixed set, no new topics"},
+      {g:"PREP", t:"Prep for anything scheduled this week"}
+    ]},
+    { day:30, time:"~3-4h", summary:"Full mock loop", tasks:[
+      {g:"PREP", t:"Full mock loop \u2014 technical and behavioral back to back \u2014 if nothing\u2019s scheduled yet"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:31, time:"~3h", summary:"Maintenance + post-mortem template ready", tasks:[
+      {g:"DSA", t:"Maintenance set"},
+      {g:"APPLY", t:"Send 8-10 applications"},
+      {g:"PREP", t:"Keep your post-mortem template ready for the first real rejection"}
+    ]},
+    { day:32, time:"~3h", summary:"Applications + spaced recall", tasks:[
+      {g:"APPLY", t:"Send applications"},
+      {g:"DSA", t:"Revisit a tricky Week 3-4 problem from memory"}
+    ]},
+    { day:33, time:"~2-3h", summary:"Interview + post-mortem", tasks:[
+      {g:"PREP", t:"Interview, real or mock \u2014 if it happened, run the 2-minute post-mortem: one specific thing to fix"}
+    ]},
+    { day:34, time:"~3h", summary:"Applications + drill the fix", tasks:[
+      {g:"APPLY", t:"Send applications"},
+      {g:"DSA", t:"Light maintenance"},
+      {g:"PREP", t:"Drill the one thing from your last post-mortem"}
+    ]},
+    { day:35, time:"~1h", summary:"Weekly review \u2014 rest", tasks:[
+      {g:"REVIEW", t:"Tally interviews landed vs. applied \u2014 what\u2019s the trend?"},
+      {g:"REVIEW", t:"Rest"}
+    ]}
+  ]},
+  { n:6, title:"Interview Mode II", days:[
+    { day:36, time:"~3h", summary:"Broad push + company research", tasks:[
+      {g:"APPLY", t:"Broad push \u2014 8-10 applications"},
+      {g:"DSA", t:"Maintenance set"},
+      {g:"PREP", t:"Company research for anything upcoming"}
+    ]},
+    { day:37, time:"~2-3h", summary:"Interview + post-mortem", tasks:[
+      {g:"PREP", t:"Interview, real or mock \u2014 post-mortem after"}
+    ]},
+    { day:38, time:"~3h", summary:"Applications + drill the fix", tasks:[
+      {g:"APPLY", t:"Send applications"},
+      {g:"PREP", t:"Deliberately fix the one thing from your last post-mortem"}
+    ]},
+    { day:39, time:"~3h", summary:"Maintenance + applications", tasks:[
+      {g:"DSA", t:"Maintenance \u2014 revisit an old weak topic"},
+      {g:"APPLY", t:"Send applications"}
+    ]},
+    { day:40, time:"~2-3h", summary:"Interview + post-mortem", tasks:[
+      {g:"PREP", t:"Interview, real or mock \u2014 post-mortem after"}
+    ]},
+    { day:41, time:"~2-3h", summary:"Applications + natural delivery check", tasks:[
+      {g:"APPLY", t:"Send applications"},
+      {g:"PREP", t:"Re-run your \u201Cwhy this company\u201D and \u201Ctell me about yourself\u201D \u2014 make sure they still sound natural, not rehearsed"}
+    ]},
+    { day:42, time:"~1-2h", summary:"Full review \u2014 Day 1 vs. now", tasks:[
+      {g:"REVIEW", t:"Compare Day 1 you to Day 42 you"},
+      {g:"REVIEW", t:"Update your resume one final time with everything you\u2019ve built and learned"},
+      {g:"REVIEW", t:"If you\u2019re still searching, this is a floor, not a wall \u2014 keep the same cadence going"}
+    ]}
+  ]}
+];
+
+const STORAGE_KEY = "ansh_42day_sprint_v1";
+let state = {};
+let currentWeek = 1;
+
+function taskId(day, idx) { return "d" + day + "-" + idx; }
+
+function allDays() {
+  const out = [];
+  WEEKS.forEach(w => w.days.forEach(d => out.push(Object.assign({week: w.n}, d))));
+  return out;
+}
+
+function dayStats(dayObj) {
+  const total = dayObj.tasks.length;
+  let done = 0;
+  dayObj.tasks.forEach((t, i) => { if (state[taskId(dayObj.day, i)]) done++; });
+  return { total: total, done: done };
+}
+
+function dayStatus(dayObj) {
+  const s = dayStats(dayObj);
+  if (s.done === 0) return "empty";
+  if (s.done === s.total) return "done";
+  return "partial";
+}
+
+function computeGlobalStats() {
+  const days = allDays();
+  let totalTasks = 0, doneTasks = 0, daysDone = 0, streak = 0, streakBroken = false;
+  days.forEach(d => {
+    const s = dayStats(d);
+    totalTasks += s.total;
+    doneTasks += s.done;
+    if (s.done === s.total) {
+      daysDone++;
+      if (!streakBroken) streak++;
+    } else {
+      streakBroken = true;
+    }
+  });
+  return {
+    totalTasks: totalTasks,
+    doneTasks: doneTasks,
+    daysDone: daysDone,
+    streak: streak,
+    pct: totalTasks ? Math.round(doneTasks / totalTasks * 100) : 0
+  };
+}
+
+function firstIncompleteWeek() {
+  const days = allDays();
+  for (let i = 0; i < days.length; i++) {
+    if (dayStatus(days[i]) !== "done") return days[i].week;
+  }
+  return 6;
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function renderGraph() {
+  const graph = document.getElementById("graph");
+  graph.innerHTML = "";
+  WEEKS.forEach(w => {
+    const label = document.createElement("div");
+    label.className = "graph-row-label";
+    label.textContent = "W" + w.n;
+    graph.appendChild(label);
+    w.days.forEach(d => {
+      const cell = document.createElement("div");
+      const status = dayStatus(d);
+      cell.className = "cell" + (status === "done" ? " done" : status === "partial" ? " partial" : "");
+      cell.title = "Day " + d.day + ": " + d.summary;
+      cell.tabIndex = 0;
+      cell.setAttribute("role", "button");
+      cell.setAttribute("aria-label", "Day " + d.day + ", " + status);
+      cell.addEventListener("click", function () { jumpToDay(w.n, d.day); });
+      cell.addEventListener("keypress", function (e) { if (e.key === "Enter") jumpToDay(w.n, d.day); });
+      graph.appendChild(cell);
+    });
+  });
+}
+
+function renderStats() {
+  const s = computeGlobalStats();
+  document.getElementById("statDays").textContent = s.daysDone + "/42";
+  document.getElementById("statStreak").textContent = s.streak;
+  document.getElementById("statTasks").textContent = s.pct + "%";
+}
+
+function renderTabs() {
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = "";
+  WEEKS.forEach(w => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "tab" + (w.n === currentWeek ? " active" : "");
+    btn.textContent = "Week " + w.n;
+    btn.addEventListener("click", function () { showWeek(w.n); });
+    tabs.appendChild(btn);
+  });
+}
+
+function renderDayCard(d) {
+  const card = document.createElement("div");
+  const status = dayStatus(d);
+  card.className = "day-card" + (status !== "empty" ? " " + status : "");
+  card.id = "day-" + d.day;
+
+  const head = document.createElement("div");
+  head.className = "day-head";
+  const badgeText = status === "done" ? "merged" : status === "partial" ? "in progress" : "pending";
+  head.innerHTML =
+    '<span class="day-num">DAY ' + String(d.day).padStart(2, "0") + '</span>' +
+    '<span class="day-summary">' + d.summary + '</span>' +
+    '<span class="day-meta">' +
+      '<span class="day-time">' + d.time + '</span>' +
+      '<span class="day-badge' + (status !== "empty" ? " " + status : "") + '">' + badgeText + '</span>' +
+    '</span>';
+  card.appendChild(head);
+
+  let lastGroup = null;
+  d.tasks.forEach(function (t, i) {
+    if (t.g !== lastGroup) {
+      const gl = document.createElement("div");
+      gl.className = "task-group-label";
+      gl.textContent = t.g;
+      card.appendChild(gl);
+      lastGroup = t.g;
+    }
+    const label = document.createElement("label");
+    label.className = "task";
+    const id = taskId(d.day, i);
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = !!state[id];
+    checkbox.dataset.day = d.day;
+    checkbox.dataset.idx = i;
+    const span = document.createElement("span");
+    span.textContent = t.t;
+    label.appendChild(checkbox);
+    label.appendChild(span);
+    card.appendChild(label);
+  });
+
+  return card;
+}
+
+function renderWeekPanels() {
+  const main = document.getElementById("weekPanels");
+  main.innerHTML = "";
+  WEEKS.forEach(w => {
+    const panel = document.createElement("div");
+    panel.className = "week-panel" + (w.n === currentWeek ? " active" : "");
+    panel.id = "week-" + w.n;
+    const header = document.createElement("div");
+    header.className = "week-header";
+    header.innerHTML = "Week " + w.n + " \u2014 <strong>" + w.title + "</strong>";
+    panel.appendChild(header);
+    w.days.forEach(d => panel.appendChild(renderDayCard(d)));
+    main.appendChild(panel);
+  });
+}
+
+function renderAll() {
+  renderGraph();
+  renderStats();
+  renderTabs();
+  renderWeekPanels();
+}
+
+function showWeek(weekN) {
+  currentWeek = weekN;
+  renderAll();
+}
+
+function jumpToDay(weekN, dayN) {
+  currentWeek = weekN;
+  renderAll();
+  requestAnimationFrame(function () {
+    const el = document.getElementById("day-" + dayN);
+    if (el) el.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+  });
+}
+
+async function loadState() {
+  try {
+    const result = await window.storage.get(STORAGE_KEY, false);
+    if (result && result.value) {
+      state = JSON.parse(result.value);
+    }
+  } catch (e) {
+    state = {};
+  }
+}
+
+async function saveState() {
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+  } catch (e) {
+    console.error("Save failed", e);
+  }
+}
+
+document.getElementById("weekPanels").addEventListener("change", function (e) {
+  if (e.target && e.target.matches('input[type="checkbox"]')) {
+    const day = e.target.dataset.day;
+    const idx = e.target.dataset.idx;
+    state[taskId(day, idx)] = e.target.checked;
+    saveState();
+    renderAll();
+  }
+});
+
+document.getElementById("resetBtn").addEventListener("click", async function () {
+  if (confirm("Reset all progress? This clears every checked task and can\u2019t be undone.")) {
+    state = {};
+    await saveState();
+    currentWeek = 1;
+    renderAll();
+  }
+});
+
+async function init() {
+  await loadState();
+  currentWeek = firstIncompleteWeek();
+  renderAll();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Restart Log — 6-Week Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F6F5F1;
+    --surface: #FFFFFF;
+    --ink: #1C1E1B;
+    --ink-soft: #63665F;
+    --line: #DEDBD2;
+    --accent-done: #2E6B4F;
+    --accent-today: #9C6B1F;
+    --accent-today-bg: #FBF1DE;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  body {
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding: 32px 18px 64px;
+  }
+
+  .mono {
+    font-family: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  }
+
+  .wrap {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .eyebrow {
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-today);
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+
+  h1 {
+    font-size: clamp(24px, 5.5vw, 30px);
+    font-weight: 600;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0 0 28px;
+    max-width: 52ch;
+    line-height: 1.5;
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 30px;
+  }
+
+  .bar-track {
+    position: relative;
+    flex: 1;
+    height: 10px;
+    background: var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent-done);
+    transition: width 0.4s ease;
+  }
+
+  .bar-track::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.45) 0 2px, transparent 2px 9px);
+    pointer-events: none;
+  }
+
+  .overall-stat {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  .today-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent-today);
+    border-radius: var(--radius);
+    padding: 20px 22px 8px;
+    margin-bottom: 28px;
+  }
+
+  .today-card .day-sub {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: -2px 0 14px;
+  }
+
+  .sprint {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .sprint summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .sprint summary::-webkit-details-marker { display: none; }
+
+  .summary-left {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .disclosure {
+    color: var(--ink-soft);
+    margin-right: 10px;
+    display: inline-block;
+    transition: transform 0.2s ease;
+    flex: none;
+  }
+  .sprint[open] .disclosure {
+    transform: rotate(90deg);
+  }
+
+  .sprint-title {
+    font-weight: 600;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sprint-meta {
+    font-size: 12px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    flex: none;
+  }
+
+  .sprint-body {
+    padding: 4px 20px 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  .day {
+    padding: 14px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .day:last-child { border-bottom: none; }
+
+  .day-head {
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+
+  .task {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    cursor: pointer;
+  }
+
+  .task input[type="checkbox"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .task-box {
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    border: 1.5px solid var(--line);
+    border-radius: 5px;
+    background: var(--surface);
+    position: relative;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .task.is-done .task-box {
+    background: var(--accent-done);
+    border-color: var(--accent-done);
+  }
+
+  .task.is-done .task-box::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 9px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .task input:focus-visible + .task-box {
+    outline: 2px solid var(--accent-today);
+    outline-offset: 2px;
+  }
+
+  .task-text {
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--ink);
+    padding-top: 1px;
+  }
+
+  .task.is-done .task-text {
+    color: var(--ink-soft);
+    text-decoration: line-through;
+    text-decoration-color: var(--line);
+  }
+
+  .footer {
+    margin-top: 30px;
+    text-align: center;
+  }
+
+  .reset-btn {
+    font-size: 12px;
+    color: var(--ink-soft);
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 8px;
+  }
+  .reset-btn:hover { color: var(--ink); }
+  .reset-btn:focus-visible { outline: 2px solid var(--accent-today); outline-offset: 2px; }
+
+  .loading {
+    font-size: 13px;
+    color: var(--ink-soft);
+    padding: 60px 0;
+    text-align: center;
+  }
+
+  @media (max-width: 460px) {
+    .progress-row { flex-direction: column; align-items: stretch; gap: 8px; }
+    .overall-stat { text-align: right; }
+    .sprint summary { padding: 13px 16px; }
+    .sprint-body { padding: 4px 16px 14px; }
+    .today-card { padding: 17px 16px 6px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap" id="root">
+    <div class="loading mono">Loading your progress…</div>
+  </div>
+
+<script>
+(async function () {
+  var TODAY = {
+    day: 1,
+    tasks: [
+      "Fix your resume \u2014 the 7 items from the audit",
+      "Deep-dive CampusMart: explain every file, answer 6\u20138 likely interview questions",
+      "DSA diagnostic: 8\u201310 easy problems across arrays, strings, hashmaps",
+      "Set up infrastructure: LeetCode/NeetCode, LinkedIn open-to-work, Wellfound/Instahyre/Cutshort profiles, tracker sheet"
+    ]
+  };
+
+  var SPRINTS = [
+    {
+      title: "Sprint 1 \u2014 Foundations",
+      range: "Days 2\u20137",
+      days: [
+        { day: 2, tasks: ["Deep-dive SkillSwap the same way \u2014 especially the Socket.io real-time logic", "Write 6\u20138 likely interview questions for SkillSwap and answer them", "Apply to 3 roles"] },
+        { day: 3, tasks: ["DSA: Arrays & Hashing \u2014 6 problems", "Apply to 3 roles"] },
+        { day: 4, tasks: ["DSA: Two Pointers \u2014 5 problems", "Apply to 3 roles"] },
+        { day: 5, tasks: ["DSA: Sliding Window \u2014 4 problems", "Redo 2 problems from Day 3, from memory", "Apply to 3 roles"] },
+        { day: 6, tasks: ["Explain both projects out loud to someone, or record yourself \u2014 no notes", "Final resume polish pass", "Apply to 3 roles"] },
+        { day: 7, tasks: ["Rest, or catch up on anything missed this week", "Pick your Sprint 2 solo project: URL shortener with analytics, rate limiter, or LRU cache"] }
+      ]
+    },
+    {
+      title: "Sprint 2 \u2014 Prove Independence",
+      range: "Days 8\u201314",
+      days: [
+        { day: 8, tasks: ["Design your solo project on paper \u2014 what it does, core data structures, API shape. No code yet", "DSA: Stacks \u2014 4 problems"] },
+        { day: 9, tasks: ["Build your solo project's core logic \u2014 AI allowed to explain concepts, never to write the code", "DSA: Binary Search \u2014 4 problems"] },
+        { day: 10, tasks: ["Continue building your solo project", "DSA: Linked Lists \u2014 4 problems"] },
+        { day: 11, tasks: ["Finish your solo project and write a README explaining your design decisions", "DSA: Trees \u2014 basic traversals, 5 problems"] },
+        { day: 12, tasks: ["Push your solo project to GitHub and link it on your resume", "Redo 2 problems from Sprint 1, from memory", "Apply to 4 roles"] },
+        { day: 13, tasks: ["DSA: Trees continued \u2014 BST, height, 4 problems", "Schedule or do a mock interview \u2014 narrate your thinking out loud"] },
+        { day: 14, tasks: ["Rest, or buffer", "Apply to 4 roles"] }
+      ]
+    },
+    {
+      title: "Sprint 3 \u2014 Graphs & DP",
+      range: "Days 15\u201321",
+      days: [
+        { day: 15, tasks: ["DSA: Graphs \u2014 BFS/DFS, 4 problems", "Apply to 3 roles"] },
+        { day: 16, tasks: ["DSA: Graphs continued, 4 problems", "Apply to 3 roles"] },
+        { day: 17, tasks: ["DSA: Intro DP (1D), 4 problems", "Apply to 3 roles"] },
+        { day: 18, tasks: ["DSA: DP continued, 4 problems", "Redo 2 problems from Sprint 2, from memory"] },
+        { day: 19, tasks: ["Timed mock technical round \u2014 45\u201360 minutes, simulate the real thing"] },
+        { day: 20, tasks: ["Prep behavioral answers: why this company, a bug you're proud of fixing, a time you were stuck"] },
+        { day: 21, tasks: ["Rest, or buffer", "Review the week \u2014 what's sticking, what isn't"] }
+      ]
+    },
+    {
+      title: "Sprint 4 \u2014 Reps & Applications",
+      range: "Days 22\u201328",
+      days: [
+        { day: 22, tasks: ["DSA: mixed review, timed \u2014 6 problems", "Apply to 4 roles"] },
+        { day: 23, tasks: ["DSA: your weakest topic so far \u2014 6 problems", "Apply to 4 roles"] },
+        { day: 24, tasks: ["Mock interview #2, narrated out loud \u2014 review the gaps after"] },
+        { day: 25, tasks: ["Redo 3 problems from Sprint 3, from memory", "Apply to 4 roles"] },
+        { day: 26, tasks: ["Networking: message 5 engineers or alumni at target companies"] },
+        { day: 27, tasks: ["DSA: mixed problems \u2014 6 problems", "Apply to 4 roles"] },
+        { day: 28, tasks: ["Rest, or buffer", "Review the month \u2014 any pattern in the rejections so far?"] }
+      ]
+    },
+    {
+      title: "Sprint 5 \u2014 Full Interview Mode",
+      range: "Days 29\u201335",
+      days: [
+        { day: 29, tasks: ["Apply broadly \u2014 aim for 6+ roles today"] },
+        { day: 30, tasks: ["DSA maintenance \u2014 4 mixed problems", "Apply to 4 roles"] },
+        { day: 31, tasks: ["Mock interview #3"] },
+        { day: 32, tasks: ["Post-mortem on any real interviews so far \u2014 name exactly what tripped you up"] },
+        { day: 33, tasks: ["DSA \u2014 revisit your weakest area again", "Apply to 4 roles"] },
+        { day: 34, tasks: ["Add one more polish feature to your solo project, if time allows"] },
+        { day: 35, tasks: ["Rest, or buffer"] }
+      ]
+    },
+    {
+      title: "Sprint 6 \u2014 Keep The Rhythm",
+      range: "Days 36\u201342",
+      days: [
+        { day: 36, tasks: ["Apply broadly", "DSA maintenance \u2014 4 problems"] },
+        { day: 37, tasks: ["Mock interview, or prep for a specific upcoming interview"] },
+        { day: 38, tasks: ["DSA \u2014 mixed review", "Apply to 4 roles"] },
+        { day: 39, tasks: ["Post-mortem and fix on anything from recent interviews"] },
+        { day: 40, tasks: ["Follow up with the contacts from Day 26"] },
+        { day: 41, tasks: ["Apply broadly", "DSA maintenance"] },
+        { day: 42, tasks: ["Full review \u2014 what's working, what to adjust from here"] }
+      ]
+    }
+  ];
+
+  function taskId(day, idx) { return 't' + day + '-' + idx; }
+
+  function countTasks(days) {
+    return days.reduce(function (sum, d) { return sum + d.tasks.length; }, 0);
+  }
+
+  function countChecked(days, state) {
+    var n = 0;
+    days.forEach(function (d) {
+      d.tasks.forEach(function (_, idx) {
+        if (state[taskId(d.day, idx)]) n++;
+      });
+    });
+    return n;
+  }
+
+  async function loadProgress() {
+    if (!window.storage) return {};
+    try {
+      var result = await window.storage.get('checklist-progress', false);
+      if (result && result.value) return JSON.parse(result.value);
+    } catch (e) { /* nothing saved yet */ }
+    return {};
+  }
+
+  async function saveProgress(state) {
+    if (!window.storage) return;
+    try {
+      await window.storage.set('checklist-progress', JSON.stringify(state), false);
+    } catch (e) {
+      console.error('Could not save progress', e);
+    }
+  }
+
+  var state = await loadProgress();
+  var root = document.getElementById('root');
+  root.innerHTML = '';
+
+  // Header
+  var header = document.createElement('div');
+  var eyebrow = document.createElement('div');
+  eyebrow.className = 'eyebrow mono';
+  eyebrow.textContent = '6-Week Plan';
+  var h1 = document.createElement('h1');
+  h1.textContent = 'Restart Log';
+  var subtitle = document.createElement('p');
+  subtitle.className = 'subtitle';
+  subtitle.textContent = 'CampusMart, SkillSwap, DSA, and the applications \u2014 from today through week six.';
+  header.appendChild(eyebrow);
+  header.appendChild(h1);
+  header.appendChild(subtitle);
+  root.appendChild(header);
+
+  // Progress row
+  var progressRow = document.createElement('div');
+  progressRow.className = 'progress-row';
+  var barTrack = document.createElement('div');
+  barTrack.className = 'bar-track';
+  var barFill = document.createElement('div');
+  barFill.className = 'bar-fill';
+  barTrack.appendChild(barFill);
+  var overallStat = document.createElement('div');
+  overallStat.className = 'overall-stat mono';
+  progressRow.appendChild(barTrack);
+  progressRow.appendChild(overallStat);
+  root.appendChild(progressRow);
+
+  function renderTaskRow(day, idx, text) {
+    var id = taskId(day, idx);
+    var checked = !!state[id];
+
+    var label = document.createElement('label');
+    label.className = 'task' + (checked ? ' is-done' : '');
+
+    var input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = checked;
+
+    var box = document.createElement('span');
+    box.className = 'task-box';
+    box.setAttribute('aria-hidden', 'true');
+
+    var span = document.createElement('span');
+    span.className = 'task-text';
+    span.textContent = text;
+
+    label.appendChild(input);
+    label.appendChild(box);
+    label.appendChild(span);
+
+    input.addEventListener('change', function () {
+      state[id] = input.checked;
+      label.classList.toggle('is-done', input.checked);
+      saveProgress(state);
+      updateAllProgress();
+    });
+
+    return label;
+  }
+
+  function renderDayBlock(day, tasks) {
+    var wrap = document.createElement('div');
+    wrap.className = 'day';
+    var head = document.createElement('div');
+    head.className = 'day-head mono';
+    head.textContent = 'DAY ' + (day < 10 ? '0' + day : day);
+    wrap.appendChild(head);
+    tasks.forEach(function (t, idx) {
+      wrap.appendChild(renderTaskRow(day, idx, t));
+    });
+    return wrap;
+  }
+
+  // Today card
+  var todayCard = document.createElement('div');
+  todayCard.className = 'today-card';
+  var todayEyebrow = document.createElement('div');
+  todayEyebrow.className = 'eyebrow mono';
+  todayEyebrow.textContent = 'Day 01 \u2014 Today';
+  var todaySub = document.createElement('p');
+  todaySub.className = 'day-sub';
+  todaySub.textContent = 'Start here. Everything else builds on this.';
+  todayCard.appendChild(todayEyebrow);
+  todayCard.appendChild(todaySub);
+  TODAY.tasks.forEach(function (t, idx) {
+    todayCard.appendChild(renderTaskRow(TODAY.day, idx, t));
+  });
+  root.appendChild(todayCard);
+
+  // Sprints
+  var sprintHandles = [];
+  SPRINTS.forEach(function (sprint) {
+    var details = document.createElement('details');
+    details.className = 'sprint';
+
+    var summary = document.createElement('summary');
+    var left = document.createElement('span');
+    left.className = 'summary-left';
+    var disclosure = document.createElement('span');
+    disclosure.className = 'disclosure';
+    disclosure.setAttribute('aria-hidden', 'true');
+    disclosure.textContent = '\u25B8';
+    var title = document.createElement('span');
+    title.className = 'sprint-title';
+    title.textContent = sprint.title;
+    left.appendChild(disclosure);
+    left.appendChild(title);
+    var meta = document.createElement('span');
+    meta.className = 'sprint-meta mono';
+    summary.appendChild(left);
+    summary.appendChild(meta);
+    details.appendChild(summary);
+
+    var body = document.createElement('div');
+    body.className = 'sprint-body';
+    sprint.days.forEach(function (d) {
+      body.appendChild(renderDayBlock(d.day, d.tasks));
+    });
+    details.appendChild(body);
+
+    function updateMeta() {
+      var total = countTasks(sprint.days);
+      var done = countChecked(sprint.days, state);
+      meta.textContent = sprint.range + ' \u00B7 ' + done + '/' + total;
+    }
+    updateMeta();
+    sprintHandles.push(updateMeta);
+
+    root.appendChild(details);
+  });
+
+  // Footer
+  var footer = document.createElement('div');
+  footer.className = 'footer';
+  var resetBtn = document.createElement('button');
+  resetBtn.className = 'reset-btn mono';
+  resetBtn.type = 'button';
+  resetBtn.textContent = 'Reset progress';
+  resetBtn.addEventListener('click', async function () {
+    var ok = window.confirm('Reset all checked progress? This cannot be undone.');
+    if (!ok) return;
+    Object.keys(state).forEach(function (k) { delete state[k]; });
+    await saveProgress(state);
+    document.querySelectorAll('.task').forEach(function (t) {
+      t.classList.remove('is-done');
+      var input = t.querySelector('input');
+      if (input) input.checked = false;
+    });
+    updateAllProgress();
+  });
+  footer.appendChild(resetBtn);
+  root.appendChild(footer);
+
+  function updateAllProgress() {
+    var allDays = [TODAY].concat(SPRINTS.reduce(function (acc, s) { return acc.concat(s.days); }, []));
+    var total = countTasks(allDays);
+    var done = countChecked(allDays, state);
+    barFill.style.width = (total ? (done / total) * 100 : 0) + '%';
+    overallStat.textContent = done + ' / ' + total + ' done';
+    sprintHandles.forEach(function (fn) { fn(); });
+  }
+
+  updateAllProgress();
+})();
+</script>
+</body>
+</html>
